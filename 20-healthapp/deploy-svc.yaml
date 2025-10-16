@@ -10,30 +10,35 @@ spec:
     metadata:
       labels: { app: health-app }
       annotations:
-        # Si tu Prometheus respeta anotaciones, habilita scrape:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
         prometheus.io/path: "/health"
     spec:
       containers:
         - name: web
-          image: ghcr.io/tiangolo/uwsgi-nginx-flask:python3.11
-          env:
-            - name: LISTEN_PORT
-              value: "8080"
+          image: python:3.11-alpine
+          command: ["/bin/sh","-lc"]
+          args:
+            - |
+              pip install --no-cache-dir flask && \
+              python /app/app.py
           ports:
             - containerPort: 8080
-          volumeMounts:
-            - name: appsrc
-              mountPath: /app
           readinessProbe:
-            httpGet: { path: /health, port: 8080 }
+            httpGet:
+              path: /health
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
-            httpGet: { path: /health, port: 8080 }
+            httpGet:
+              path: /health
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 20
+          volumeMounts:
+            - name: appsrc
+              mountPath: /app
       volumes:
         - name: appsrc
           configMap:

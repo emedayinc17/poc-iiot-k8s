@@ -1,3 +1,6 @@
+# ~/tsistemas/poc-iiot-k8s/40-network/netpol.yaml
+
+# 1) Default deny: niega todo por defecto en iiot-poc (buena práctica PoC)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -5,8 +8,12 @@ metadata:
   namespace: iiot-poc
 spec:
   podSelector: {}
-  policyTypes: ["Ingress","Egress"]
+  policyTypes:
+    - Ingress
+    - Egress
+
 ---
+# 2) Allow iiot traffic: permite solo tráfico entre sensores, mosquitto y health-app
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -16,7 +23,8 @@ spec:
   podSelector:
     matchLabels:
       app: mosquitto
-  policyTypes: ["Ingress"]
+  policyTypes:
+    - Ingress
   ingress:
     - from:
         - podSelector:
@@ -28,3 +36,29 @@ spec:
       ports:
         - protocol: TCP
           port: 1883
+
+---
+# 3) Allow ingress & monitoring: permite al controller Ingress (y a Prometheus en monitoring)
+#    acceder a health-app:8080. Usa namespaceSelector -> por ello documentamos el label a añadir.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-health-from-ingress-monitoring
+  namespace: iiot-poc
+spec:
+  podSelector:
+    matchLabels:
+      app: health-app
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080

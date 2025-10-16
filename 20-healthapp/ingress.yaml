@@ -3,9 +3,8 @@ kind: Ingress
 metadata:
   name: health-ingress
   namespace: iiot-poc
-  annotations:
-    kubernetes.io/ingress.class: nginx
 spec:
+  ingressClassName: nginx
   rules:
     - host: salud-poc.emeday.inc
       http:
