@@ -20,21 +20,16 @@ spec:
           command: ["/bin/sh","-lc"]
           args:
             - |
-              pip install --no-cache-dir flask && \
               python /app/app.py
           ports:
             - containerPort: 8080
           readinessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 5
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 3
             periodSeconds: 10
           livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 10
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 5
             periodSeconds: 20
           volumeMounts:
             - name: appsrc
