@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: healthapp-src
+  namespace: iiot-poc
+data:
+  app.py: |
+    from flask import Flask, request, jsonify
+    app = Flask(__name__)
+
+    @app.get("/health")
+    def health():
+        return jsonify({"status":"ok"}), 200
+
+    # endpoint simple para simular intentos de login fallidos
+    @app.post("/login")
+    def login():
+        user = request.json.get("user","")
+        pwd  = request.json.get("pwd","")
+        # nunca aceptamos para simular T0814 (fuerza bruta / credenciales invalidas)
+        app.logger.warning({"event":"invalid_login","user":user,"remote":request.remote_addr})
+        return jsonify({"ok": False}), 401
+
+    if __name__ == "__main__":
+        app.run(host="0.0.0.0", port=8080)

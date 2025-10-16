@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-app
+  namespace: iiot-poc
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: health-app } }
+  template:
+    metadata:
+      labels: { app: health-app }
+      annotations:
+        # Si tu Prometheus respeta anotaciones, habilita scrape:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/health"
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/tiangolo/uwsgi-nginx-flask:python3.11
+          env:
+            - name: LISTEN_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: appsrc
+              mountPath: /app
+          readinessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+      volumes:
+        - name: appsrc
+          configMap:
+            name: healthapp-src
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: health-app
+  namespace: iiot-poc
+spec:
+  selector: { app: health-app }
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

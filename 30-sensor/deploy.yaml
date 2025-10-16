@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iiot-sensor
+  namespace: iiot-poc
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: iiot-sensor } }
+  template:
+    metadata:
+      labels: { app: iiot-sensor }
+    spec:
+      containers:
+        - name: sensor
+          image: python:3.11-alpine
+          env:
+            - name: MQTT_HOST
+              value: "mosquitto.iiot-poc.svc.cluster.local"
+            - name: MQTT_TOPIC
+              value: "mine/linea1/telemetry"
+          command: ["/bin/sh","-lc"]
+          args:
+            - |
+              pip install --no-cache-dir paho-mqtt && \
+              python /app/sensor_pub.py
+          volumeMounts:
+            - name: src
+              mountPath: /app
+      volumes:
+        - name: src
+          configMap:
+            name: sensor-src

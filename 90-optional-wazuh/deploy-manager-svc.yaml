@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wazuh-manager
+  namespace: iiot-poc
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: wazuh-manager } }
+  template:
+    metadata: { labels: { app: wazuh-manager } }
+    spec:
+      containers:
+        - name: manager
+          image: wazuh/wazuh:4.7.5
+          env:
+            - name: SECURE
+              value: "false"
+          ports:
+            - containerPort: 1514
+              protocol: UDP
+            - containerPort: 1515
+            - containerPort: 55000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wazuh-manager
+  namespace: iiot-poc
+spec:
+  selector: { app: wazuh-manager }
+  ports:
+    - name: tcp-1515
+      port: 1515
+      targetPort: 1515
+    - name: udp-1514
+      port: 1514
+      targetPort: 1514
+      protocol: UDP
+    - name: tcp-55000
+      port: 55000
+      targetPort: 55000
+  type: ClusterIP

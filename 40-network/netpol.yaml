@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: iiot-poc
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress","Egress"]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-iiot
+  namespace: iiot-poc
+spec:
+  podSelector:
+    matchLabels:
+      app: mosquitto
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: iiot-sensor
+        - podSelector:
+            matchLabels:
+              app: health-app
+      ports:
+        - protocol: TCP
+          port: 1883

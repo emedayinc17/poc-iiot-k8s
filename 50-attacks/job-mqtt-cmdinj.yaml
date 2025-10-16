@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: attack-cmdinj-a1
+  namespace: iiot-poc
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: attacker
+          image: alpine:3.20
+          command: ["/bin/sh","-lc"]
+          args:
+            - |
+              apk add --no-cache mosquitto-clients coreutils && \
+              T0=$(date +%s); echo "t0=$T0"; \
+              mosquitto_pub -h mosquitto.iiot-poc.svc.cluster.local \
+                -t mine/linea1/telemetry \
+                -m "{\"attack_id\":\"A1\",\"sensor\":\"cmd\",\"value\":\";uname -a\",\"ts\":$T0}" && \
+              sleep 1 && echo "done"

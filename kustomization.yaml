@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 00-namespace.yaml
+  - 10-mosquitto/deploy-svc.yaml
+  - 20-healthapp/cm-app.yaml
+  - 20-healthapp/deploy-svc.yaml
+  - 20-healthapp/ingress.yaml
+  - 30-sensor/cm-sensor.yaml
+  - 30-sensor/deploy.yaml
+  - 40-network/netpol.yaml
+# Los de 50/90 son manuales (lanzas cuando quieras)
