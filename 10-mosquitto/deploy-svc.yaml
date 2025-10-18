@@ -9,14 +9,23 @@ spec:
   template:
     metadata:
       labels: { app: mosquitto }
-      annotations:
-        prometheus.io/scrape: "false"
     spec:
       containers:
         - name: mosquitto
           image: eclipse-mosquitto:2.0
           ports:
             - containerPort: 1883
+          volumeMounts:
+            - name: cfg
+              mountPath: /mosquitto/config
+          readinessProbe:
+            tcpSocket: { port: 1883 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+      volumes:
+        - name: cfg
+          configMap:
+            name: mosquitto-config
 ---
 apiVersion: v1
 kind: Service

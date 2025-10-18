@@ -13,7 +13,7 @@ spec:
     - Egress
 
 ---
-# 2) Allow iiot traffic: permite solo tráfico entre sensores, mosquitto y health-app
+# 2) Allow iiot traffic: permite solo tráfico entre sensores, mosquitto y health-app (MQTT ingress)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -33,13 +33,16 @@ spec:
         - podSelector:
             matchLabels:
               app: health-app
+        - podSelector:
+            matchLabels:
+              app: attacker   # ⬅️ nuevo: permite solo a pods del Job con este label
       ports:
         - protocol: TCP
           port: 1883
 
+
 ---
 # 3) Allow ingress & monitoring: permite al controller Ingress (y a Prometheus en monitoring)
-#    acceder a health-app:8080. Usa namespaceSelector -> por ello documentamos el label a añadir.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -62,3 +65,44 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+
+---
+# 4) Allow egress minimal: permite a pods de iiot-poc resolver DNS y conectar al broker Mosquitto
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-iiot
+  namespace: iiot-poc
+spec:
+  # aplica a TODOS los pods en iiot-poc (podSelector: {}), ajusta si quieres limitar
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # a) permitir conexión al pod mosquitto (TCP:1883)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: mosquitto
+      ports:
+        - protocol: TCP
+          port: 1883
+
+    # b) permitir DNS al namespace kube-system (suele ejecutar coredns ahí) UDP:53
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+
+    # c) (opcional, borrable si no quieres egress Internet) permitir salida a Internet
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443

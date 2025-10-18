@@ -21,11 +21,21 @@ spec:
           command: ["/bin/sh","-lc"]
           args:
             - |
-              pip install --no-cache-dir paho-mqtt && \
+              set -e
+              apk add --no-cache ca-certificates >/dev/null 2>&1 || true
+              python -m pip install --no-cache-dir --upgrade pip >/dev/null 2>&1 || true
+              pip install --no-cache-dir paho-mqtt
+              echo "Starting publisher..."
               python /app/sensor_pub.py
           volumeMounts:
             - name: src
               mountPath: /app
+          # Opcional: pequeña probe para ver que publica al menos una vez
+          readinessProbe:
+            exec:
+              command: ["/bin/sh","-lc","test -f /tmp/sensor.ready || [ $(($(date +%s)-0)) -gt 10 ]"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
       volumes:
         - name: src
           configMap:
