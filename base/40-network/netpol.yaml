@@ -106,3 +106,25 @@ spec:
           port: 80
         - protocol: TCP
           port: 443
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring-to-iiot
+  namespace: iiot-poc
+spec:
+  podSelector: {}              # aplica a todos los pods en iiot-poc (o filtra por labels si prefieres)
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 80      # health-app (si tu /health corre en 80)
+        - protocol: TCP
+          port: 1883    # mosquitto
+        - protocol: TCP
+          port: 10050   # si usas zabbix-agent en pods (opcional)

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-server
+  labels:
+    app: zabbix-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-server
+  template:
+    metadata:
+      labels:
+        app: zabbix-server
+    spec:
+      containers:
+        - name: zabbix-server
+          image: zabbix/zabbix-server-pg:6.2-latest
+          env:
+            - name: DB_SERVER_HOST
+              value: zabbix-postgres.monitoring.svc.cluster.local
+            - name: POSTGRES_USER
+              value: zabbix
+            - name: POSTGRES_PASSWORD
+              value: zabbixpass
+            - name: ZBX_DEBUGLEVEL
+              value: "3"
+          ports:
+            - containerPort: 10051
+          readinessProbe:
+            tcpSocket:
+              port: 10051
+            initialDelaySeconds: 10
+            periodSeconds: 10

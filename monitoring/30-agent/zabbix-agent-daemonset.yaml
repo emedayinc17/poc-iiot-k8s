@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zabbix-agent
+  labels:
+    app: zabbix-agent
+spec:
+  selector:
+    matchLabels:
+      app: zabbix-agent
+  template:
+    metadata:
+      labels:
+        app: zabbix-agent
+    spec:
+      serviceAccountName: default
+      hostNetwork: false
+      containers:
+        - name: zabbix-agent
+          image: zabbix/zabbix-agent:6.2-latest
+          env:
+            - name: ZBX_SERVER_HOST
+              value: zabbix-server.monitoring.svc.cluster.local
+            - name: ZBX_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - containerPort: 10050
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+            type: DirectoryOrCreate
