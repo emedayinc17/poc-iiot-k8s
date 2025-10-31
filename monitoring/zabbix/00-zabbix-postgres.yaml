@@ -1,0 +1,59 @@
+# BEGIN POCPROC
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zabbix-postgres-secret
+  namespace: monitoring
+type: Opaque
+stringData:
+  POSTGRES_DB: zabbix
+  POSTGRES_USER: zabbix
+  POSTGRES_PASSWORD: {{PLACEHOLDER_PG_PASSWORD}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-postgres
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-postgres
+  template:
+    metadata:
+      labels:
+        app: zabbix-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        envFrom:
+        - secretRef:
+            name: zabbix-postgres-secret
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: pgdata
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: pgdata
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-postgres
+  namespace: monitoring
+spec:
+  selector:
+    app: zabbix-postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+# END POCPROC

@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 00-namespace.yaml
+  - 10-postgres/postgres-pvc.yaml
+  - 10-postgres/postgres-deployment.yaml
+  - 10-postgres/postgres-svc.yaml
+  - 20-zabbix/zabbix-server-deployment.yaml
+  - 20-zabbix/zabbix-server-svc.yaml
+  - 20-zabbix/zabbix-web-deployment.yaml
+  - 20-zabbix/zabbix-web-svc.yaml
+  - 20-zabbix/zabbix-web-ingress.yaml
+  - 30-agent/zabbix-agent-svcaccount.yaml
+  - 30-agent/zabbix-agent-daemonset.yaml
+namespace: monitoring

@@ -1,0 +1,8 @@
+[
+  "eventid",
+  "clock",
+  "severity",
+  "name",
+  "ack",
+  "tags"
+]

@@ -1,0 +1,24 @@
+{
+  "title": "MTTD Experimentos IIoT",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "MTTD promedio (s)",
+      "id": 1,
+      "targets": [
+        {
+          "expr": "avg(mttd_seconds)",
+          "legendFormat": "MTTD"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  }
+}

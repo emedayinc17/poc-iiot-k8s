@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zabbix-agent
+  labels:
+    app: zabbix-agent
+spec:
+  selector:
+    matchLabels:
+      app: zabbix-agent
+  template:
+    metadata:
+      labels:
+        app: zabbix-agent
+    spec:
+      serviceAccountName: zabbix-agent
+      hostNetwork: true
+      hostPID: true
+      dnsPolicy: "ClusterFirstWithHostNet"  # ¡IMPORTANTE!
+      containers:
+        - name: zabbix-agent
+          image: zabbix/zabbix-agent:ubuntu-7.0-latest
+          env:
+            - name: ZBX_SERVER_HOST
+              value: "zabbix-server.monitoring.svc.cluster.local"
+            - name: ZBX_SERVER_ACTIVE
+              value: "zabbix-server.monitoring.svc.cluster.local:10051"
+            - name: ZBX_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: ZBX_PASSIVE_ALLOW
+              value: "true"
+            - name: ZBX_ACTIVE_ALLOW
+              value: "true" 
+          ports:
+            - containerPort: 10050
+              hostPort: 10050
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+            type: DirectoryOrCreate
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys

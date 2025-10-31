@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zabbix-web-ingress
+  namespace: monitoring
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: zabbix.emeday.inc
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zabbix-web
+                port:
+                  number: 80
+# Si quieres HTTPS, crea el secreto TLS y descomenta:
+#  tls:
+#    - hosts: [zabbix.emaday.inc]
+#      secretName: zabbix-tls

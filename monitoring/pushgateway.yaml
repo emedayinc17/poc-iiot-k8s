@@ -1,0 +1,39 @@
+# BEGIN POCPROC
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pushgateway
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pushgateway
+  template:
+    metadata:
+      labels:
+        app: pushgateway
+    spec:
+      containers:
+      - name: pushgateway
+        image: prom/pushgateway:v1.8.0
+        ports:
+        - containerPort: 9091
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pushgateway
+  namespace: monitoring
+spec:
+  selector:
+    app: pushgateway
+  ports:
+  - port: 9091
+    targetPort: 9091
+# END POCPROC

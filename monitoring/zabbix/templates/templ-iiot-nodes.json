@@ -1,0 +1,51 @@
+{
+  "zabbix_export": {
+    "version": "6.0",
+    "date": "2025-10-30T01:00:00Z",
+    "groups": [
+      {
+        "uuid": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+        "name": "IIoT-LAB"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "b2c3d4e5-6f7a-8b9c-0d1e-2f3a4b5c6d7e",
+        "template": "IIoT-LAB Nodes",
+        "name": "IIoT-LAB Nodes",
+        "groups": [
+          {
+            "uuid": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+            "name": "IIoT-LAB"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "c3d4e5f6-7a8b-9c0d-1e2f-3a4b5c6d7e8f",
+            "name": "CPU avg1",
+            "key": "system.cpu.util[,avg1]",
+            "type": 0,
+            "value_type": 0,
+            "delay": "30s"
+          },
+          {
+            "uuid": "d4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
+            "name": "Procesos totales",
+            "key": "proc.num[]",
+            "type": 0,
+            "value_type": 3,
+            "delay": "30s"
+          }
+        ],
+        "triggers": [
+          {
+            "uuid": "e5f6a7b8-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
+            "expression": "{IIoT-LAB Nodes:system.cpu.util[,avg1].min(5m)}>80",
+            "name": "CPU > 80% (avg1)",
+            "priority": 3
+          }
+        ]
+      }
+    ]
+  }
+}

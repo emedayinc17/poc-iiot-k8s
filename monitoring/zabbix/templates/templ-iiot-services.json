@@ -1,0 +1,51 @@
+{
+  "zabbix_export": {
+    "version": "6.0",
+    "date": "2025-10-30T01:00:00Z",
+    "groups": [
+      {
+        "uuid": "f6a7b8c9-0d1e-2f3a-4b5c-6d7e8f9a0b1c",
+        "name": "IIoT-LAB"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "a7b8c9d0-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
+        "template": "IIoT-LAB Services",
+        "name": "IIoT-LAB Services",
+        "groups": [
+          {
+            "uuid": "f6a7b8c9-0d1e-2f3a-4b5c-6d7e8f9a0b1c",
+            "name": "IIoT-LAB"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "b8c9d0e1-2f3a-4b5c-6d7e-8f9a0b1c2d3e",
+            "name": "Service Port Status",
+            "key": "net.tcp.listen[{#PORT}]",
+            "type": 0,
+            "value_type": 3,
+            "delay": "30s"
+          },
+          {
+            "uuid": "c9d0e1f2-3a4b-5c6d-7e8f-9a0b1c2d3e4f",
+            "name": "ICMP Ping",
+            "key": "icmpping",
+            "type": 0,
+            "value_type": 3,
+            "delay": "30s"
+          }
+        ],
+        "triggers": [
+          {
+            "uuid": "d0e1f2a3-4b5c-6d7e-8f9a-0b1c2d3e4f5a",
+            "expression": "{IIoT-LAB Services:net.tcp.listen[{#PORT}].last()}=0",
+            "name": "Service port {#PORT} is down",
+            "priority": 4
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+# BEGIN POCPROC
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zabbix-agent-iiot
+  namespace: iiot-poc
+spec:
+  selector:
+    matchLabels:
+      app: zabbix-agent-iiot
+  template:
+    metadata:
+      labels:
+        app: zabbix-agent-iiot
+    spec:
+      containers:
+      - name: zabbix-agent2
+        image: zabbix/zabbix-agent2:alpine-6.4.8
+        env:
+        - name: ZBX_SERVER_HOST
+          value: zabbix-server.monitoring.svc.cluster.local
+        - name: ZBX_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: ZBX_ACTIVE_ALLOW
+          value: "true"
+        ports:
+        - containerPort: 10050
+# END POCPROC

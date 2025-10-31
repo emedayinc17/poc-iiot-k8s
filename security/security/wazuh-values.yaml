@@ -1,0 +1,47 @@
+# Valores mínimos para Wazuh
+global:
+  opensearch:
+    security:
+      enabled: false
+
+wazuh-indexer:
+  enabled: true
+  replicas: 1
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "250m"
+
+wazuh-manager:
+  enabled: true
+  replicas: 1
+  api:
+    enabled: true
+    https: true
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+
+wazuh-dashboard:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  api:
+    enabled: true
+    host: "wazuh.emeday.inc"
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  dashboard:
+    enabled: true
+    host: "wazuh-ui.emeday.inc"

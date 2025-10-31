@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-server
+  labels:
+    app: zabbix-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-server
+  template:
+    metadata:
+      labels:
+        app: zabbix-server
+    spec:
+      # Esperar a que PostgreSQL esté listo
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z zabbix-postgres.monitoring.svc.cluster.local 5432; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+      containers:
+        - name: zabbix-server
+          image: zabbix/zabbix-server-pgsql:ubuntu-7.0-latest
+          env:
+            - name: DB_SERVER_HOST
+              value: zabbix-postgres.monitoring.svc.cluster.local
+            - name: DB_SERVER_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: zabbix
+            - name: POSTGRES_PASSWORD
+              value: zabbixpass
+            - name: POSTGRES_DB
+              value: zabbix
+            - name: ZBX_DEBUGLEVEL
+              value: "3"
+            - name: ZBX_TIMEOUT
+              value: "30"
+          ports:
+            - containerPort: 10051
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          readinessProbe:
+            tcpSocket:
+              port: 10051
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: 10051
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
